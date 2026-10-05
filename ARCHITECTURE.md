@@ -2,6 +2,8 @@
 
 Discovery date: October 5, 2026. Status: proposed; no application implemented or runtime behavior verified.
 
+Implementation update, October 5, 2026: **Milestone 0 is complete on the tested Windows desktop at 100% scaling**. The Release self-contained WPF export passed transparency, dragging, ordinary input/focus, topmost toggling, recovery, and Exit checks. See [Milestone 0 findings](docs/MILESTONE_0_FINDINGS.md) for evidence and unverified DPI/monitor cases. The discovery assessment below is retained as the source of truth for later milestones; no gameplay milestones have begun.
+
 ## Recommendation and assumptions
 
 Build a Windows-first, offline desktop widget using **C#, WPF, and .NET 10 LTS**, with transparent PNG artwork and simple frame/transform animations. Use one application project and one small test project. A game engine is unnecessary for this scope. “Smallest” means the least implementation and operational complexity, not the smallest possible executable.
