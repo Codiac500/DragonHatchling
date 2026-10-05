@@ -13,9 +13,21 @@ public sealed class PetController
         return true;
     }
 
-    public bool CompleteHatch()
+    public bool TryFeed() => TryReact(PetActivity.Eating);
+    public bool TryPlay() => TryReact(PetActivity.Playing);
+
+    private bool TryReact(PetActivity activity)
     {
-        if (State.Activity != PetActivity.Hatching) return false;
+        if (State != new PetState(PetStage.Baby, PetActivity.Idle)) return false;
+        State = new(PetStage.Baby, activity);
+        return true;
+    }
+
+    public bool CompleteHatch() => CompleteReaction(PetActivity.Hatching);
+
+    public bool CompleteReaction(PetActivity expected)
+    {
+        if (expected == PetActivity.Idle || State.Activity != expected) return false;
         State = new(PetStage.Baby, PetActivity.Idle);
         return true;
     }

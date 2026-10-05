@@ -29,34 +29,64 @@ public partial class MainWindow : Window
         Deactivated += (_, _) => Record("deactivated");
         LocationChanged += (_, _) => Record("location");
         DpiChanged += (_, _) => Record("dpi-changed");
+        StateChanged += (_, _) =>
+        {
+            if (controller.State.Activity == PetActivity.Idle)
+                animator.ShowIdle(controller.State.Stage, WindowState != WindowState.Minimized);
+            Record("window-state");
+        };
         Closed += (_, _) =>
         {
             closing = true;
             lifetime.Cancel();
+            animator.StopMotion();
             Record("closed");
         };
     }
 
-    private async void Hatch_Click(object sender, RoutedEventArgs e)
+    private async void Hatch_Click(object sender, RoutedEventArgs e) =>
+        await RunReactionAsync(PetActivity.Hatching, controller.TryHatch, animator.HatchAsync);
+
+    private async void Feed_Click(object sender, RoutedEventArgs e) =>
+        await RunReactionAsync(PetActivity.Eating, controller.TryFeed, animator.FeedAsync);
+
+    private async void Play_Click(object sender, RoutedEventArgs e) =>
+        await RunReactionAsync(PetActivity.Playing, controller.TryPlay, animator.PlayAsync);
+
+    private async Task RunReactionAsync(PetActivity activity, Func<bool> accept,
+        Func<CancellationToken, Task> animate)
     {
-        if (!controller.TryHatch()) { Record("hatch-ignored"); return; }
-        HatchButton.IsEnabled = false;
-        StatusText.Text = "Hatching…";
-        Record("hatch-accepted");
-        try { await animator.HatchAsync(lifetime.Token); }
+        if (!accept()) { Record($"{activity}-ignored"); return; }
+        UpdateActions();
+        Record($"{activity}-accepted");
+        try { await animate(lifetime.Token); }
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
         finally
         {
-            controller.CompleteHatch();
+            controller.CompleteReaction(activity);
             if (!closing)
             {
-                animator.ShowIdle(controller.State.Stage);
-                StatusText.Text = "Baby · Idle";
-                HatchButton.Content = "Hatched";
-                Record("hatch-completed");
+                animator.ShowIdle(controller.State.Stage, WindowState != WindowState.Minimized);
+                UpdateActions();
+                Record($"{activity}-completed");
             }
-            else Record("hatch-cancelled");
+            else Record($"{activity}-cancelled");
         }
+    }
+
+    private void UpdateActions()
+    {
+        var state = controller.State;
+        var idle = state.Activity == PetActivity.Idle;
+        HatchButton.IsEnabled = idle && state.Stage == PetStage.Egg;
+        FeedButton.IsEnabled = PlayButton.IsEnabled = idle && state.Stage == PetStage.Baby;
+        StatusText.Text = state.Activity switch
+        {
+            PetActivity.Hatching => "Hatching…",
+            PetActivity.Eating => "Baby · Eating…",
+            PetActivity.Playing => "Baby · Playing!",
+            _ => state.Stage == PetStage.Egg ? "Egg · Ready to hatch" : "Baby · Idle"
+        };
     }
 
     private void Placeholder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

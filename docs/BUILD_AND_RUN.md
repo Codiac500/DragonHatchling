@@ -1,6 +1,6 @@
 # Build and run DragonHatchling
 
-These instructions describe the current Milestone 1 application. Run PowerShell commands from the repository root, the directory containing `global.json` and `scripts`.
+These instructions describe the current Milestone 2 application. Run PowerShell commands from the repository root, the directory containing `global.json` and `scripts`.
 
 ## Requirements
 
@@ -61,12 +61,13 @@ Close any running copy before publishing again so its files can be replaced.
 1. Launch to see an egg in a compact transparent window.
 2. Click **Hatch**. The egg shakes, cracks, and reveals a baby dragon in about two seconds.
 3. The baby returns to **Idle**. Hatch stays disabled; the egg can hatch only once per launch.
+   Click **Feed** for food and chewing, or **Play** for happy eyes, sparkles, and hops. Each reaction lasts about two seconds, returns to idle breathing, and is repeatable. Interaction clicks while busy are ignored rather than queued. Window controls remain available.
 4. Drag the visible egg or dragon to move the window. Use opaque artwork rather than transparent margins.
 5. Toggle **Always on top** to keep the pet above ordinary windows.
 6. Click **Reset position**, or press **Ctrl+Home** while the pet window has focus, to center it on the primary display.
 7. Use the taskbar or **Alt+Tab** to recover a covered window. Click **Exit** or press **Alt+F4** to close it.
 
-Every launch currently starts with an egg, centered, with always-on-top off. Lifecycle and window preferences are not yet saved. Feed, Play, and continuous idle motion are not implemented in Milestone 1.
+Every launch currently starts with an egg, centered, with always-on-top off. Lifecycle and window preferences are not yet saved. Idle breathing uses a WPF animation capped at 12 frames per second and stops while minimized; reactions use finite asynchronous sequences.
 
 ## Run from source during development
 
@@ -96,7 +97,7 @@ Or, with the local SDK:
 ./.tools/dotnet/dotnet.exe run --project tests/DragonHatchling.Tests/DragonHatchling.Tests.csproj -c Release
 ```
 
-The dependency-free executable prints `PASS` on success and exits nonzero on failure. It checks initial state, the one-way hatch transition, repeated commands while busy and after hatching, and duplicate completion callbacks. Desktop rendering, input, DPI, and focus behavior require application-level checks; see [Milestone 1 results](MILESTONE_1_RESULTS.md).
+The dependency-free executable prints `PASS` on success and exits nonzero on failure. It checks initial state, the one-way hatch transition, egg restrictions, repeatable Feed/Play, rapid mixed commands while busy, and wrong/duplicate completion callbacks. Desktop rendering, input, DPI, and focus behavior require application-level checks; see [Milestone 2 results](MILESTONE_2_RESULTS.md).
 
 ## Optional diagnostics
 
@@ -106,17 +107,17 @@ Launch the export with a log path:
 ./artifacts/win-x64/DragonHatchling.Desktop.exe --diagnostics ./artifacts/window-events.log
 ```
 
-The parent directory must already exist. Publishing creates `artifacts`, so this example works after a build. The log records window activation, movement, DPI, topmost changes, hatch acceptance/completion, lifecycle/activity, and closure. An unwritable log does not interrupt the application. These diagnostics do not save pet progress or preferences.
+The parent directory must already exist. Publishing creates `artifacts`, so this example works after a build. The log records window activation, movement, DPI, topmost changes, reaction acceptance/completion/cancellation, lifecycle/activity, window-state changes, and closure. An unwritable log does not interrupt the application. These diagnostics do not save pet progress or preferences.
 
 ## Optional placeholder art generation
 
-To regenerate the included egg, cracked egg, and baby PNGs on Windows:
+To regenerate the included egg, cracked egg, baby, eating, and playing PNGs on Windows:
 
 ```powershell
 ./scripts/New-PlaceholderArt.ps1
 ```
 
-This replaces those three files under `src/DragonHatchling.Desktop/Assets`. Rebuild to include them in the export. All three use a transparent 160 × 160 canvas with a shared bottom anchor at (80, 140).
+This replaces those five files under `src/DragonHatchling.Desktop/Assets`. Rebuild to include them in the export. All five use a transparent 160 × 160 canvas with a shared bottom anchor at (80, 140).
 
 ## Troubleshooting
 
@@ -129,6 +130,6 @@ This replaces those three files under `src/DragonHatchling.Desktop/Assets`. Rebu
 | Published EXE is missing | Run the publish script; ignored build outputs are not present in a fresh clone. |
 | Copied EXE fails to start | Copy the entire `artifacts/win-x64` folder, preserving its files and subdirectories. |
 | Window is covered or misplaced | Use the taskbar or Alt+Tab, then Reset position or Ctrl+Home. Relaunching also centers it. |
-| Relaunch shows an egg again | Expected in Milestone 1; persistence is planned for Milestone 3. |
+| Relaunch shows an egg again | Expected in Milestone 2; persistence is planned for Milestone 3. |
 
 The existing validation covers Milestone 0 at 100% scaling and Milestone 1 at observed 150% scaling. Mixed-DPI monitor behavior, 200% scaling, and monitor removal remain unverified. See [Milestone 0 findings](MILESTONE_0_FINDINGS.md) and [Milestone 1 results](MILESTONE_1_RESULTS.md) for the recorded limits.

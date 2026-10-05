@@ -1,15 +1,16 @@
 # DragonHatchling
 Project for trying out agentic workflows to create a little transparent window desktop dragon pet.
 
-Milestone 1 implements the hatching slice: a placeholder egg, explicit Hatch action, short crack/reveal animation, and a baby dragon that returns to idle. The compact transparent window retains dragging, always-on-top, position reset, and Exit. Feed, Play, continuous idle motion, and persistence belong to later milestones.
+Milestone 2 implements the interaction slice: Hatch reveals a baby, Feed plays a chewing reaction, and Play produces happy hops. Gentle idle breathing pauses when minimized. The compact transparent window retains dragging, always-on-top, position reset, and Exit. Persistence remains Milestone 3 work.
 
-The source of truth is [ARCHITECTURE.md](ARCHITECTURE.md) at the repository root. See [Milestone 0 findings](docs/MILESTONE_0_FINDINGS.md) and [Milestone 1 results](docs/MILESTONE_1_RESULTS.md) for validation and limitations.
+The source of truth is [ARCHITECTURE.md](ARCHITECTURE.md) at the repository root. See [Milestone 0 findings](docs/MILESTONE_0_FINDINGS.md), [Milestone 1 results](docs/MILESTONE_1_RESULTS.md), and [Milestone 2 results](docs/MILESTONE_2_RESULTS.md) for validation and limitations.
 
 ## Run the exported application
 
 On Windows x64, launch `artifacts/win-x64/DragonHatchling.Desktop.exe`. Keep the entire export folder together; it includes the .NET runtime and does not require a separate runtime installation. Build outputs are ignored by Git.
 
 - Click **Hatch** to reveal the baby dragon. Hatch is disabled during the reaction and afterward; clicks are never queued.
+- Click **Feed** or **Play** on the idle baby. Both return to idle in about two seconds and can be repeated. All interaction buttons are disabled while a reaction runs; movement and window controls remain available.
 - Drag the visible egg or dragon to move the window. Transparent margins are not reliable drag handles.
 - Toggle **Always on top** to keep it visible over other ordinary applications.
 - **Reset position** or **Ctrl+Home** centers it on the primary display's work area.
@@ -50,4 +51,4 @@ Optional event logging (no saved preferences):
 ./artifacts/win-x64/DragonHatchling.Desktop.exe --diagnostics ./artifacts/window-events.log
 ```
 
-The log records activation, deactivation, dragging, position reset, DPI, topmost changes, hatch acceptance/completion, lifecycle/activity, and closure. Its parent directory must exist; an unwritable log does not interrupt the app.
+The log records activation, deactivation, dragging, position reset, DPI, topmost changes, reaction acceptance/completion/cancellation, lifecycle/activity, window-state changes, and closure. Its parent directory must exist; an unwritable log does not interrupt the app.
