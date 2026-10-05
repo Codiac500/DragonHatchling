@@ -4,6 +4,8 @@ Discovery date: October 5, 2026. Status: proposed; no application implemented or
 
 Implementation update, October 5, 2026: **Milestone 0 is complete on the tested Windows desktop at 100% scaling**. The Release self-contained WPF export passed transparency, dragging, ordinary input/focus, topmost toggling, recovery, and Exit checks. See [Milestone 0 findings](docs/MILESTONE_0_FINDINGS.md) for evidence and unverified DPI/monitor cases. The discovery assessment below is retained as the source of truth for later milestones; no gameplay milestones have begun.
 
+Milestone 1 update, October 5, 2026: the hatching slice meets its exit criteria in lifecycle tests and the exported application at observed 150% scaling. See [Milestone 1 results](docs/MILESTONE_1_RESULTS.md). Milestone 1 is complete; Milestone 2 has not begun. The roadmap and architecture below remain unchanged.
+
 ## Recommendation and assumptions
 
 Build a Windows-first, offline desktop widget using **C#, WPF, and .NET 10 LTS**, with transparent PNG artwork and simple frame/transform animations. Use one application project and one small test project. A game engine is unnecessary for this scope. “Smallest” means the least implementation and operational complexity, not the smallest possible executable.
@@ -108,4 +110,4 @@ Automate a few meaningful tests: legal lifecycle transitions, ignored commands w
 
 For the product review, observe a few testers without explaining the controls. Can they hatch, feed, play, move, and close the pet? Do the two reactions feel distinct? Do they choose to leave it visible during normal desktop work? Use those observations to decide whether v0.2 deserves care meters, better animation, or a different platform. Do not assume that more systems will make the companion more appealing.
 
-Next recommended action: implement milestone 0 only and record its findings before committing to the remaining roadmap. This discovery pass changes documentation only.
+Current next action: review Milestone 1, then proceed to Milestone 2 if approved. The original discovery recommended Milestone 0 as the first decision gate; its results and subsequent milestone results are linked above.

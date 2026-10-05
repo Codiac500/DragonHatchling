@@ -8,6 +8,6 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Resource Include="Assets/placeholder.png" />
+    <Resource Include="Assets/*.png" />
   </ItemGroup>
 </Project>
