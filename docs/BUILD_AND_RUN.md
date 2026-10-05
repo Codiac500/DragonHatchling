@@ -1,6 +1,6 @@
 # Build and run DragonHatchling
 
-These instructions describe the current Milestone 3 application. Run PowerShell commands from the repository root, the directory containing `global.json` and `scripts`.
+These instructions describe the Milestone 4 prototype delivery. Run PowerShell commands from the repository root, the directory containing `global.json` and `scripts`.
 
 ## Requirements
 
@@ -52,9 +52,61 @@ After building, run:
 
 Alternatively, open `artifacts/win-x64` in File Explorer and double-click `DragonHatchling.Desktop.exe`.
 
-Keep **the entire publish folder together** when copying the application. The EXE depends on neighboring files, including its bundled .NET runtime. A separate runtime installation is not required to run this export. Build outputs are ignored by Git, so build first on a fresh clone. Separate-machine delivery remains an outstanding Milestone 4 validation task.
+Keep **the entire publish folder together** when copying the application. The EXE depends on neighboring files, including its bundled .NET runtime. A separate runtime installation is not required to run this export. Build outputs are ignored by Git, so build first on a fresh clone. Separate-machine/VM testing was waived for Milestone 4 by the user.
 
 Close any running copy before publishing again so its files can be replaced.
+
+## Package for private testers
+
+```powershell
+./scripts/Package.ps1 -Dotnet ./.tools/dotnet/dotnet.exe
+```
+
+Use `-Dotnet dotnet` with an installed matching SDK. Packaging publishes to a
+fresh directory under ignored `artifacts/package-*/win-x64`, includes
+[prototype run notes](PROTOTYPE_RUN_NOTES.md) beside the EXE, and creates
+`artifacts/DragonHatchling-win-x64.zip` plus a `.zip.sha256` checksum. The ZIP
+contains one `win-x64` folder, with the complete self-contained export. It
+contains no SDK, development saves, diagnostic logs, or test runner. Later
+packaging runs replace the ZIP and checksum. Extract to a new folder for each
+delivery check; do not overlay a previous export.
+
+The run notes include optional broader desktop and delivery checks.
+Milestone 4 is complete under the user's revised acceptance criteria;
+separate-machine/VM testing is not required for this prototype. See
+[Milestone 4 results](MILESTONE_4_RESULTS.md) for the executed checks and limits.
+
+## Measure resource use
+
+Launch the extracted EXE, use Task Manager to find its process ID, then run:
+
+```powershell
+./scripts/Measure-Resources.ps1 -ProcessId 12345 -Minutes 15 -OutputPath ./artifacts/validation/session.csv
+```
+
+Replace `12345` with the actual process ID. Use a new output filename for each
+run. The script records a baseline and samples every 30 seconds for at least
+15 minutes. CPU is the interval process CPU divided by wall time and logical
+processor count, expressed as percent of the machine. It also records working
+set, private memory, handles, threads, and Windows process responsiveness.
+It stops with an error if the process exits, its ID is reused, or it becomes
+unresponsive, and warns if sampling takes more than twice the requested
+interval. Such gaps interrupt continuous observation and can dilute wall-time
+CPU averages. It does not launch or close the pet. Review trends after warm-up
+against the provisional 1% idle CPU and 150 MiB working-set investigation
+thresholds. Process responsiveness does not prove mouse input or focus works.
+
+For an additional automated WPF endurance check:
+
+```powershell
+./.tools/dotnet/dotnet.exe run --project tests/DragonHatchling.Tests -c Release -f net10.0-windows -- --endurance-minutes 15
+```
+
+This uses production WPF windows, repeated reactions and busy command guards,
+topmost toggles, Reset, and Exit/restart with isolated temporary saves. It
+fails if a reaction stays busy for more than five seconds or controls fail
+to restore. It supplements the desktop session; it does not inject OS mouse
+input, drag windows, or establish focus/transparency behavior.
 
 ## Use the application
 

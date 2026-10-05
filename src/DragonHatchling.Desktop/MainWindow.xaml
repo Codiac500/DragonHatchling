@@ -1,7 +1,7 @@
 <Window x:Class="DragonHatchling.Desktop.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="DragonHatchling — Persistence slice" Width="240" Height="280"
+        Title="DragonHatchling" Width="240" Height="280"
         WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True"
         Background="Transparent" ShowInTaskbar="True" Topmost="False"
         PreviewKeyDown="Window_KeyDown">

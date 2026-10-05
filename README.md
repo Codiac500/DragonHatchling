@@ -1,9 +1,9 @@
 # DragonHatchling
 Project for trying out agentic workflows to create a little transparent window desktop dragon pet.
 
-Milestone 3 adds local saves, placement recovery, and save-error feedback to the existing Hatch, Feed, and Play loop. The compact transparent window retains dragging, always-on-top, position reset, and Exit.
+The prototype provides Hatch, Feed, Play, local saves, placement recovery, dragging, always-on-top, position reset, and Exit in a compact transparent window. Milestone 4 is complete under the user's revised acceptance criteria, with private delivery packaging, tester run notes, and resource/endurance validation. Separate-machine/VM testing was waived; PC sleep explains the sampling gap.
 
-The source of truth is [ARCHITECTURE.md](ARCHITECTURE.md) at the repository root. See [Milestone 0 findings](docs/MILESTONE_0_FINDINGS.md), [Milestone 1 results](docs/MILESTONE_1_RESULTS.md), [Milestone 2 results](docs/MILESTONE_2_RESULTS.md), and [Milestone 3 results](docs/MILESTONE_3_RESULTS.md) for validation and limitations.
+The source of truth is [ARCHITECTURE.md](ARCHITECTURE.md) at the repository root. See [Milestone 0 findings](docs/MILESTONE_0_FINDINGS.md), [Milestone 1 results](docs/MILESTONE_1_RESULTS.md), [Milestone 2 results](docs/MILESTONE_2_RESULTS.md), [Milestone 3 results](docs/MILESTONE_3_RESULTS.md), and [Milestone 4 results](docs/MILESTONE_4_RESULTS.md) for validation and limitations.
 
 ## Run the exported application
 
@@ -35,6 +35,14 @@ For this workspace, a checksum-verified SDK was extracted locally rather than in
 ```
 
 The script publishes Release, self-contained, Windows x64 output to `artifacts/win-x64`. The application uses only WPF and the .NET libraries.
+
+Create the private delivery ZIP, bundled [tester run notes](docs/PROTOTYPE_RUN_NOTES.md), and SHA-256 checksum with:
+
+```powershell
+./scripts/Package.ps1 -Dotnet ./.tools/dotnet/dotnet.exe
+```
+
+The result is `artifacts/DragonHatchling-win-x64.zip`. See [delivery and resource validation](docs/BUILD_AND_RUN.md#package-for-private-testers) for reproduction steps.
 
 Run the dependency-free lifecycle checks (nonzero exit on failure):
 

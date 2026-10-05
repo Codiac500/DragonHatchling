@@ -99,5 +99,10 @@ try
 finally { Directory.Delete(directory, recursive: true); }
 
 #if WINDOWS
-WpfChecks.Run();
+var enduranceIndex = Array.IndexOf(args, "--endurance-minutes");
+var enduranceMinutes = 0;
+if (enduranceIndex >= 0 && (enduranceIndex + 1 >= args.Length ||
+    !int.TryParse(args[enduranceIndex + 1], out enduranceMinutes) || enduranceMinutes is < 1 or > 60))
+    throw new ArgumentException("--endurance-minutes requires an integer from 1 to 60.");
+WpfChecks.Run(enduranceMinutes);
 #endif

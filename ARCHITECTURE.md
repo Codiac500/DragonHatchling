@@ -10,6 +10,8 @@ Milestone 2 update, October 5, 2026: the interaction slice meets its exit criter
 
 Milestone 3 update, October 5, 2026: persistence and resilience meet the exit criteria in save/placement tests, actual WPF reaction-Exit checks, and exported-app restart/recovery checks at observed 100% scaling. See [Milestone 3 results](docs/MILESTONE_3_RESULTS.md). Physical monitor removal and mixed-DPI hardware checks remain unverified. The user approved committing Milestone 3; Milestone 4 has not begun. The roadmap and architecture remain unchanged.
 
+Milestone 4 update, October 5, 2026: **Milestone 4 is complete under the user's revised prototype acceptance criteria**. Prototype packaging, tester run notes, resource measurements, and a 900-second WPF endurance check are delivered. The user confirmed PC sleep caused the sampling gap and waived separate Windows-machine/VM testing, accepting the existing validation for completion. No additional manual desktop session or clean-machine test is claimed. See [Milestone 4 results](docs/MILESTONE_4_RESULTS.md). Changes remain uncommitted; no architectural redesign was needed.
+
 ## Recommendation and assumptions
 
 Build a Windows-first, offline desktop widget using **C#, WPF, and .NET 10 LTS**, with transparent PNG artwork and simple frame/transform animations. Use one application project and one small test project. A game engine is unnecessary for this scope. “Smallest” means the least implementation and operational complexity, not the smallest possible executable.
@@ -114,4 +116,6 @@ Automate a few meaningful tests: legal lifecycle transitions, ignored commands w
 
 For the product review, observe a few testers without explaining the controls. Can they hatch, feed, play, move, and close the pet? Do the two reactions feel distinct? Do they choose to leave it visible during normal desktop work? Use those observations to decide whether v0.2 deserves care meters, better animation, or a different platform. Do not assume that more systems will make the companion more appealing.
 
-Current next action: proceed to Milestone 4 when requested. The original discovery recommended Milestone 0 as the first decision gate; its results and subsequent milestone results are linked above.
+Milestone 4 acceptance revision, October 5, 2026: the original exit condition above is retained as historical planning context. For this prototype, the user waived separate-machine/VM testing and accepted the existing desktop, WPF endurance, and resource evidence for completion. The sampling gap is explained by PC sleep and is not an unresolved finding.
+
+Current next action: review the uncommitted Milestone 4 delivery and proceed with tester/product-review planning. Subsequent implementation should follow those observations. The original discovery recommended Milestone 0 as the first decision gate; its results and subsequent milestone results are linked above.
