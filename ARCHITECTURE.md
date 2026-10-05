@@ -8,6 +8,8 @@ Milestone 1 update, October 5, 2026: the hatching slice meets its exit criteria 
 
 Milestone 2 update, October 5, 2026: the interaction slice meets its exit criteria in controller tests and the exported application at observed 100% scaling. See [Milestone 2 results](docs/MILESTONE_2_RESULTS.md). Feed and Play are distinct, repeatable, and return to idle under rapid input. Changes await review and are uncommitted. Milestone 3 has not begun; the roadmap and architecture remain unchanged.
 
+Milestone 3 update, October 5, 2026: persistence and resilience meet the exit criteria in save/placement tests, actual WPF reaction-Exit checks, and exported-app restart/recovery checks at observed 100% scaling. See [Milestone 3 results](docs/MILESTONE_3_RESULTS.md). Physical monitor removal and mixed-DPI hardware checks remain unverified. The user approved committing Milestone 3; Milestone 4 has not begun. The roadmap and architecture remain unchanged.
+
 ## Recommendation and assumptions
 
 Build a Windows-first, offline desktop widget using **C#, WPF, and .NET 10 LTS**, with transparent PNG artwork and simple frame/transform animations. Use one application project and one small test project. A game engine is unnecessary for this scope. “Smallest” means the least implementation and operational complexity, not the smallest possible executable.
@@ -112,4 +114,4 @@ Automate a few meaningful tests: legal lifecycle transitions, ignored commands w
 
 For the product review, observe a few testers without explaining the controls. Can they hatch, feed, play, move, and close the pet? Do the two reactions feel distinct? Do they choose to leave it visible during normal desktop work? Use those observations to decide whether v0.2 deserves care meters, better animation, or a different platform. Do not assume that more systems will make the companion more appealing.
 
-Current next action: review Milestone 2, then proceed to Milestone 3 if approved. The original discovery recommended Milestone 0 as the first decision gate; its results and subsequent milestone results are linked above.
+Current next action: proceed to Milestone 4 when requested. The original discovery recommended Milestone 0 as the first decision gate; its results and subsequent milestone results are linked above.

@@ -98,7 +98,7 @@ public sealed class PetAnimator
 
     private static BitmapImage Load(string name)
     {
-        var bitmap = new BitmapImage(new Uri($"pack://application:,,,/Assets/{name}"));
+        var bitmap = new BitmapImage(new Uri($"pack://application:,,,/DragonHatchling.Desktop;component/Assets/{name}"));
         bitmap.Freeze();
         return bitmap;
     }

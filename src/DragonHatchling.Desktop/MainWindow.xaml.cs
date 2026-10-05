@@ -9,22 +9,42 @@ namespace DragonHatchling.Desktop;
 public partial class MainWindow : Window
 {
     private readonly string? diagnosticsPath;
-    private readonly PetController controller = new();
+    private readonly PetController controller;
+    private readonly SaveStore saveStore;
+    private readonly SaveLoadResult restored;
     private readonly PetAnimator animator;
     private readonly CancellationTokenSource lifetime = new();
     private bool closing;
+    private bool ready;
+    private string? saveMessage;
 
-    public MainWindow()
+    public MainWindow() : this(null) { }
+
+    public MainWindow(string? savePath)
     {
-        // Opt-in diagnostics only; persistence belongs to milestone 3.
         var args = Environment.GetCommandLineArgs();
         var index = Array.IndexOf(args, "--diagnostics");
         if (index >= 0 && index + 1 < args.Length)
             diagnosticsPath = Path.GetFullPath(args[index + 1]);
 
+        index = Array.IndexOf(args, "--save-path");
+        saveStore = new(savePath ?? (index >= 0 && index + 1 < args.Length ? Path.GetFullPath(args[index + 1]) : SaveStore.DefaultPath));
+        restored = saveStore.Load();
+        controller = new(restored.Data?.Stage ?? PetStage.Egg);
+        saveMessage = restored.Message;
+
         InitializeComponent();
         animator = new(PetImage);
-        Loaded += (_, _) => { CenterOnPrimaryDisplay(); Record("loaded"); };
+        Loaded += (_, _) =>
+        {
+            WindowPlacement.Restore(this, restored.Data?.X, restored.Data?.Y);
+            TopmostToggle.IsChecked = restored.Data?.AlwaysOnTop ?? false;
+            animator.ShowIdle(controller.State.Stage);
+            ready = true;
+            UpdateActions();
+            Record("loaded");
+        };
+        Microsoft.Win32.SystemEvents.DisplaySettingsChanged += DisplaySettingsChanged;
         Activated += (_, _) => Record("activated");
         Deactivated += (_, _) => Record("deactivated");
         LocationChanged += (_, _) => Record("location");
@@ -38,6 +58,7 @@ public partial class MainWindow : Window
         Closed += (_, _) =>
         {
             closing = true;
+            Microsoft.Win32.SystemEvents.DisplaySettingsChanged -= DisplaySettingsChanged;
             lifetime.Cancel();
             animator.StopMotion();
             Record("closed");
@@ -57,6 +78,7 @@ public partial class MainWindow : Window
         Func<CancellationToken, Task> animate)
     {
         if (!accept()) { Record($"{activity}-ignored"); return; }
+        if (activity == PetActivity.Hatching) SaveProgress();
         UpdateActions();
         Record($"{activity}-accepted");
         try { await animate(lifetime.Token); }
@@ -80,12 +102,13 @@ public partial class MainWindow : Window
         var idle = state.Activity == PetActivity.Idle;
         HatchButton.IsEnabled = idle && state.Stage == PetStage.Egg;
         FeedButton.IsEnabled = PlayButton.IsEnabled = idle && state.Stage == PetStage.Baby;
+        StatusText.ToolTip = saveMessage;
         StatusText.Text = state.Activity switch
         {
             PetActivity.Hatching => "Hatching…",
             PetActivity.Eating => "Baby · Eating…",
             PetActivity.Playing => "Baby · Playing!",
-            _ => state.Stage == PetStage.Egg ? "Egg · Ready to hatch" : "Baby · Idle"
+            _ => saveMessage ?? (state.Stage == PetStage.Egg ? "Egg · Ready to hatch" : "Baby · Idle")
         };
     }
 
@@ -96,6 +119,9 @@ public partial class MainWindow : Window
         Record("drag-start");
         // Native WPF move loop handles capture and release, with no timer or polling.
         DragMove();
+        var position = WindowPlacement.Capture(this);
+        WindowPlacement.Restore(this, position.X, position.Y);
+        SaveProgress();
         Record("drag-end");
     }
 
@@ -103,6 +129,7 @@ public partial class MainWindow : Window
     {
         Topmost = TopmostToggle.IsChecked == true;
         Record("topmost-toggle");
+        if (ready) SaveProgress();
     }
 
     private void Reset_Click(object sender, RoutedEventArgs e) => CenterOnPrimaryDisplay();
@@ -119,12 +146,27 @@ public partial class MainWindow : Window
 
     private void CenterOnPrimaryDisplay()
     {
-        // WPF work area and window bounds are device-independent units.
-        // Cross-monitor restoration belongs to milestone 3, after mixed-DPI testing.
-        var area = SystemParameters.WorkArea;
-        Left = area.Left + Math.Max(0, (area.Width - Width) / 2);
-        Top = area.Top + Math.Max(0, (area.Height - Height) / 2);
+        WindowPlacement.Restore(this);
+        SaveProgress();
         Record("reset-position");
+    }
+
+    private void DisplaySettingsChanged(object? sender, EventArgs e) => Dispatcher.BeginInvoke(() =>
+    {
+        if (!ready || closing || WindowState == WindowState.Minimized) return;
+        var position = WindowPlacement.Capture(this);
+        WindowPlacement.Restore(this, position.X, position.Y);
+        SaveProgress();
+        Record("display-recovery");
+    });
+
+    private void SaveProgress()
+    {
+        if (!ready || closing) return;
+        var position = WindowPlacement.Capture(this);
+        saveMessage = saveStore.Save(new(1, controller.State.Stage, position.X, position.Y, Topmost));
+        UpdateActions();
+        Record(saveMessage is null ? "saved" : "save-failed");
     }
 
     private void Record(string eventName)

@@ -1,9 +1,9 @@
 # DragonHatchling
 Project for trying out agentic workflows to create a little transparent window desktop dragon pet.
 
-Milestone 2 implements the interaction slice: Hatch reveals a baby, Feed plays a chewing reaction, and Play produces happy hops. Gentle idle breathing pauses when minimized. The compact transparent window retains dragging, always-on-top, position reset, and Exit. Persistence remains Milestone 3 work.
+Milestone 3 adds local saves, placement recovery, and save-error feedback to the existing Hatch, Feed, and Play loop. The compact transparent window retains dragging, always-on-top, position reset, and Exit.
 
-The source of truth is [ARCHITECTURE.md](ARCHITECTURE.md) at the repository root. See [Milestone 0 findings](docs/MILESTONE_0_FINDINGS.md), [Milestone 1 results](docs/MILESTONE_1_RESULTS.md), and [Milestone 2 results](docs/MILESTONE_2_RESULTS.md) for validation and limitations.
+The source of truth is [ARCHITECTURE.md](ARCHITECTURE.md) at the repository root. See [Milestone 0 findings](docs/MILESTONE_0_FINDINGS.md), [Milestone 1 results](docs/MILESTONE_1_RESULTS.md), [Milestone 2 results](docs/MILESTONE_2_RESULTS.md), and [Milestone 3 results](docs/MILESTONE_3_RESULTS.md) for validation and limitations.
 
 ## Run the exported application
 
@@ -15,7 +15,8 @@ On Windows x64, launch `artifacts/win-x64/DragonHatchling.Desktop.exe`. Keep the
 - Toggle **Always on top** to keep it visible over other ordinary applications.
 - **Reset position** or **Ctrl+Home** centers it on the primary display's work area.
 - Use the taskbar or **Alt+Tab** to find it; **Exit** or **Alt+F4** closes it.
-- Each launch starts with an egg, centered, with always-on-top off. Lifecycle and preferences are not saved until Milestone 3.
+- First launch starts with a centered egg and always-on-top off. Later launches restore the saved Egg/Baby stage, position, and topmost preference. Closing during hatch reopens at Baby/Idle when saving succeeded.
+- Saves live at `%LOCALAPPDATA%/DragonHatchling/save.json`, with the previous valid save in `save.json.bak`. Recovery messages appear in the action strip; see [recovery instructions](docs/BUILD_AND_RUN.md#save-recovery).
 
 ## Build
 
@@ -38,14 +39,14 @@ The script publishes Release, self-contained, Windows x64 output to `artifacts/w
 Run the dependency-free lifecycle checks (nonzero exit on failure):
 
 ```powershell
-./.tools/dotnet/dotnet.exe run --project tests/DragonHatchling.Tests -c Release
+./.tools/dotnet/dotnet.exe run --project tests/DragonHatchling.Tests -c Release -f net10.0
 ```
 
-Use `dotnet` instead of the local SDK path on other machines. The small test project compiles the same plain C# lifecycle sources without WPF, checking the one-way transition, commands while busy, and duplicate completion callbacks.
+Use `dotnet` instead of the local SDK path on other machines. The tests check lifecycle, persistence/recovery, and placement rules. Add `-f net10.0-windows` instead to include WPF Exit-during-reaction and restart checks using temporary isolated saves.
 
 Placeholder PNGs can be regenerated on Windows with `./scripts/New-PlaceholderArt.ps1`. Each uses a transparent 160 × 160 canvas and a shared bottom anchor at (80, 140).
 
-Optional event logging (no saved preferences):
+Optional event logging:
 
 ```powershell
 ./artifacts/win-x64/DragonHatchling.Desktop.exe --diagnostics ./artifacts/window-events.log

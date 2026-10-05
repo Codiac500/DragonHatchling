@@ -1,6 +1,6 @@
 # Build and run DragonHatchling
 
-These instructions describe the current Milestone 2 application. Run PowerShell commands from the repository root, the directory containing `global.json` and `scripts`.
+These instructions describe the current Milestone 3 application. Run PowerShell commands from the repository root, the directory containing `global.json` and `scripts`.
 
 ## Requirements
 
@@ -58,16 +58,32 @@ Close any running copy before publishing again so its files can be replaced.
 
 ## Use the application
 
-1. Launch to see an egg in a compact transparent window.
+1. First launch shows an egg in a compact transparent window. Subsequent launches restore the saved stage and window preferences.
 2. Click **Hatch**. The egg shakes, cracks, and reveals a baby dragon in about two seconds.
-3. The baby returns to **Idle**. Hatch stays disabled; the egg can hatch only once per launch.
+3. The baby returns to **Idle**. Hatch stays disabled; the saved baby cannot hatch again.
    Click **Feed** for food and chewing, or **Play** for happy eyes, sparkles, and hops. Each reaction lasts about two seconds, returns to idle breathing, and is repeatable. Interaction clicks while busy are ignored rather than queued. Window controls remain available.
 4. Drag the visible egg or dragon to move the window. Use opaque artwork rather than transparent margins.
 5. Toggle **Always on top** to keep the pet above ordinary windows.
 6. Click **Reset position**, or press **Ctrl+Home** while the pet window has focus, to center it on the primary display.
 7. Use the taskbar or **Alt+Tab** to recover a covered window. Click **Exit** or press **Alt+F4** to close it.
 
-Every launch currently starts with an egg, centered, with always-on-top off. Lifecycle and window preferences are not yet saved. Idle breathing uses a WPF animation capped at 12 frames per second and stops while minimized; reactions use finite asynchronous sequences.
+Saves use `%LOCALAPPDATA%/DragonHatchling/save.json`. Stage is saved before the hatch reveal; position after dragging or Reset; topmost after toggling. Temporary reactions are never saved. Restored placement clamps to a monitor work area or centers on the primary display if its monitor is gone. Idle breathing uses a WPF animation capped at 12 frames per second and stops while minimized; reactions use finite asynchronous sequences.
+
+## Save recovery
+
+The JSON schema version is 1: `stage` is `Egg` or `Baby`; `x`/`y` are the window origin in physical virtual-desktop pixels (negative coordinates are legal); `alwaysOnTop` is a Boolean. `save.json.bak` retains the previous valid save. Writes use a unique temporary file in the same directory, flush it, then atomically replace the primary file. Abandoned temporary files are ignored.
+
+A malformed, incomplete, out-of-range, or newer-version save is preserved at its original path. The app loads a valid backup if available, otherwise an egg, and shows a recovery message. Saving remains paused while a suspect primary or backup exists, so gameplay during that recovery session is not retained. To resume saving, close the pet, copy the affected files somewhere safe, and move the suspect files out of the save directory. If the backup is valid, copy it to `save.json` before relaunching. Do not edit a newer-version file into this schema; retain it for a compatible version.
+
+“Progress could not be saved” means a write failed. The pet stays usable; resolve storage permissions/availability and retry by toggling topmost or using Reset position. A successful retry saves the current stage and preferences. A hatch that could not be saved can be lost on restart.
+
+For isolated development checks, override the save location:
+
+```powershell
+./artifacts/win-x64/DragonHatchling.Desktop.exe --save-path ./artifacts/test-save.json
+```
+
+This override is optional; normal launches use LocalAppData. Run one copy against a save path at a time; simultaneous copies are not coordinated.
 
 ## Run from source during development
 
@@ -85,19 +101,19 @@ With the repository-local SDK:
 
 Use the published EXE for validating the self-contained export. Running from source uses the development SDK/runtime environment.
 
-## Run lifecycle tests
+## Run lifecycle, persistence, and placement tests
 
 ```powershell
-dotnet run --project tests/DragonHatchling.Tests/DragonHatchling.Tests.csproj -c Release
+dotnet run --project tests/DragonHatchling.Tests/DragonHatchling.Tests.csproj -c Release -f net10.0
 ```
 
 Or, with the local SDK:
 
 ```powershell
-./.tools/dotnet/dotnet.exe run --project tests/DragonHatchling.Tests/DragonHatchling.Tests.csproj -c Release
+./.tools/dotnet/dotnet.exe run --project tests/DragonHatchling.Tests/DragonHatchling.Tests.csproj -c Release -f net10.0
 ```
 
-The dependency-free executable prints `PASS` on success and exits nonzero on failure. It checks initial state, the one-way hatch transition, egg restrictions, repeatable Feed/Play, rapid mixed commands while busy, and wrong/duplicate completion callbacks. Desktop rendering, input, DPI, and focus behavior require application-level checks; see [Milestone 2 results](MILESTONE_2_RESULTS.md).
+The dependency-free executable prints `PASS` on success and exits nonzero on failure. It checks lifecycle/interaction rules, save round trips and backups, restart during hatch, interrupted writes, malformed/newer saves, unavailable storage, and negative/clipped/lost-monitor placement. Use `-f net10.0-windows` to also open temporary WPF windows, invoke Exit during each reaction, and verify Baby/Idle on reopen. Both targets use isolated temporary saves. The Windows target requires the .NET 10 Windows Desktop runtime supplied by the development SDK; it does not represent a clean-machine check. Desktop rendering, input, DPI, and focus behavior require application-level checks; see [Milestone 3 results](MILESTONE_3_RESULTS.md).
 
 ## Optional diagnostics
 
@@ -107,7 +123,7 @@ Launch the export with a log path:
 ./artifacts/win-x64/DragonHatchling.Desktop.exe --diagnostics ./artifacts/window-events.log
 ```
 
-The parent directory must already exist. Publishing creates `artifacts`, so this example works after a build. The log records window activation, movement, DPI, topmost changes, reaction acceptance/completion/cancellation, lifecycle/activity, window-state changes, and closure. An unwritable log does not interrupt the application. These diagnostics do not save pet progress or preferences.
+The parent directory must already exist. Publishing creates `artifacts`, so this example works after a build. The log records window activation, movement, DPI, topmost changes, save success/failure, display recovery, reaction acceptance/completion/cancellation, lifecycle/activity, window-state changes, and closure. Diagnostic coordinates are WPF device-independent units; saved coordinates are physical pixels. An unwritable log does not interrupt the application.
 
 ## Optional placeholder art generation
 
@@ -129,7 +145,7 @@ This replaces those five files under `src/DragonHatchling.Desktop/Assets`. Rebui
 | Publish cannot replace a file | Exit all running copies of DragonHatchling, then rebuild. |
 | Published EXE is missing | Run the publish script; ignored build outputs are not present in a fresh clone. |
 | Copied EXE fails to start | Copy the entire `artifacts/win-x64` folder, preserving its files and subdirectories. |
-| Window is covered or misplaced | Use the taskbar or Alt+Tab, then Reset position or Ctrl+Home. Relaunching also centers it. |
-| Relaunch shows an egg again | Expected in Milestone 2; persistence is planned for Milestone 3. |
+| Window is covered or misplaced | Use the taskbar or Alt+Tab, then Reset position or Ctrl+Home. Unavailable saved monitor positions center on relaunch. |
+| Relaunch shows an egg again | Check the action-strip recovery message and save directory; see Save recovery above. |
 
 The existing validation covers Milestone 0 at 100% scaling and Milestone 1 at observed 150% scaling. Mixed-DPI monitor behavior, 200% scaling, and monitor removal remain unverified. See [Milestone 0 findings](MILESTONE_0_FINDINGS.md) and [Milestone 1 results](MILESTONE_1_RESULTS.md) for the recorded limits.
